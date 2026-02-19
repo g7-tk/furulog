@@ -36,14 +36,15 @@ export async function POST(req: Request) {
           }
         );
 
+        const contentType = res.headers.get("content-type") || "image/jpeg";
         const buffer = await res.arrayBuffer();
 
-        const imageRef = ref(storage, `line/${Date.now()}.jpg`);
+        const imageRef = ref(storage, `line/${Date.now()}`);
         await uploadBytes(imageRef, new Uint8Array(buffer), {
-  contentType: "image/jpeg",
-});
-        let imageUrl = await getDownloadURL(imageRef);
-imageUrl = imageUrl.replace("firebasestorage.app", "appspot.com");
+          contentType,
+        });
+
+        const imageUrl = await getDownloadURL(imageRef);
 
         await addDoc(collection(db, "items"), {
           brand: "LINE画像",
