@@ -39,7 +39,9 @@ export async function POST(req: Request) {
         const buffer = await res.arrayBuffer();
 
         const imageRef = ref(storage, `line/${Date.now()}.jpg`);
-        await uploadBytes(imageRef, new Uint8Array(buffer));
+        await uploadBytes(imageRef, new Uint8Array(buffer), {
+  contentType: "image/jpeg",
+});
         let imageUrl = await getDownloadURL(imageRef);
 imageUrl = imageUrl.replace("firebasestorage.app", "appspot.com");
 
