@@ -3,7 +3,7 @@ import { db, storage } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const TOKEN = "84pwgSPAyhbDyxgz2cw0jOpZPU+/2UOPifEs8efclAfSDgTQ3bSYFXw+lTYOqfyG+CRqe0vl2jbvCfvJt44fipxSWG3764wWFojrUDonIMe9VovhyPs583O5LMwzOcFcvqYJtu5uQXS6S7t3TNe1jgdB04t89/1O/w1cDnyilFU=ここにLINEトークン貼る";
+const TOKEN = "84pwgSPAyhbDyxgz2cw0jOpZPU+/2UOPifEs8efclAfSDgTQ3bSYFXw+lTYOqfyG+CRqe0vl2jbvCJt44fipxSWG3764wWFojrUDonIMe9VovhyPs583O5LMwzOcFcvqYJtu5uQXS6S7t3TNe1jgdB04t89/1O/w1cDnyilFU=";
 
 export async function POST(req: Request) {
   const body = await req.json();
