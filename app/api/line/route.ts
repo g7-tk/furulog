@@ -40,7 +40,8 @@ export async function POST(req: Request) {
 
         const imageRef = ref(storage, `line/${Date.now()}.jpg`);
         await uploadBytes(imageRef, new Uint8Array(buffer));
-        const imageUrl = await getDownloadURL(imageRef);
+        let imageUrl = await getDownloadURL(imageRef);
+imageUrl = imageUrl.replace("firebasestorage.app", "appspot.com");
 
         await addDoc(collection(db, "items"), {
           brand: "LINE画像",
