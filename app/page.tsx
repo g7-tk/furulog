@@ -7,23 +7,31 @@ import { db } from "@/lib/firebase";
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
 
-  const fetchData = async () => {
-    const snapshot = await getDocs(collection(db, "items"));
-    const data = snapshot.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
-    setItems(data);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const snapshot = await getDocs(collection(db, "items"));
+
+      const data: any[] = [];
+      snapshot.forEach((d) => {
+        const item = d.data();
+        data.push({
+          id: d.id,
+          brand: item.brand || "",
+          price: item.price || 0,
+          imageUrl: item.imageUrl || "",
+        });
+      });
+
+      setItems(data);
+    };
+
+    fetchData();
+  }, []);
 
   const handleDelete = async (id: string) => {
     await deleteDoc(doc(db, "items", id));
-    fetchData();
+    location.reload();
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -32,7 +40,7 @@ export default function Home() {
       <div className="grid grid-cols-2 gap-4">
         {items.map((item) => (
           <div key={item.id} className="bg-white p-4 rounded-2xl shadow">
-            {item.imageUrl && (
+            {item.imageUrl !== "" && (
               <img
                 src={item.imageUrl}
                 className="w-full h-40 object-cover rounded-xl mb-3"
