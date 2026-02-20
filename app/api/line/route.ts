@@ -13,7 +13,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const TOKEN = process.env.LINE_TOKEN!;
 
-async function reply(replyToken: string, message: any) {
+async function reply(replyToken: string, text: string) {
   await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: {
@@ -22,7 +22,7 @@ async function reply(replyToken: string, message: any) {
     },
     body: JSON.stringify({
       replyToken,
-      messages: [message],
+      messages: [{ type: "text", text }],
     }),
   });
 }
@@ -33,11 +33,12 @@ export async function POST(req: Request) {
   for (const event of body.events ?? []) {
     if (event.type !== "message") continue;
 
-    const userId = event.source.userId;
-    const draftRef = doc(db, "drafts", userId);
-    const draftSnap = await getDoc(draftRef);
+    const userId = event.source?.userId;
+    if (!userId) continue;
 
-    // 登録開始
+    const draftRef = doc(db, "drafts", userId);
+
+    // ===== 登録開始 =====
     if (event.message.type === "text" && event.message.text === "登録") {
       await setDoc(draftRef, {
         brand: "",
@@ -47,21 +48,30 @@ export async function POST(req: Request) {
         imageUrls: [],
       });
 
-      await reply(event.replyToken, {
-        type: "text",
-        text: "登録を開始しました。ブランド・価格・場所・写真を送ってください。",
-      });
-
+      await reply(event.replyToken, "登録を開始しました。入力してください。");
       continue;
     }
 
+    // draft取得
+    const draftSnap = await getDoc(draftRef);
     if (!draftSnap.exists()) continue;
 
     const draft = draftSnap.data();
 
-    // テキスト処理
+    // ===== テキスト =====
     if (event.message.type === "text") {
       const text = event.message.text;
+
+      if (text === "完了") {
+        await addDoc(collection(db, "items"), {
+          ...draft,
+          createdAt: new Date(),
+        });
+
+        await deleteDoc(draftRef);
+        await reply(event.replyToken, "保存しました！");
+        continue;
+      }
 
       if (/^\d+$/.test(text)) {
         await updateDoc(draftRef, { price: Number(text) });
@@ -69,13 +79,10 @@ export async function POST(req: Request) {
         await updateDoc(draftRef, { brand: text });
       }
 
-      await reply(event.replyToken, {
-        type: "text",
-        text: "保存しました。続けて入力してください。完了と送ると保存します。",
-      });
+      await reply(event.replyToken, "保存しました。続けて入力してください。");
     }
 
-    // 画像処理
+    // ===== 画像 =====
     if (event.message.type === "image") {
       const res = await fetch(
         `https://api-data.line.me/v2/bot/message/${event.message.id}/content`,
@@ -83,11 +90,16 @@ export async function POST(req: Request) {
       );
 
       const arrayBuffer = await res.arrayBuffer();
+
       const imageRef = ref(storage, `line/${Date.now()}`);
 
-      await uploadBytes(imageRef, new Uint8Array(arrayBuffer), {
-        contentType: res.headers.get("content-type") || "image/jpeg",
-      });
+      await uploadBytes(
+        imageRef,
+        new Uint8Array(arrayBuffer),
+        {
+          contentType: res.headers.get("content-type") || "image/jpeg",
+        }
+      );
 
       const imageUrl = await getDownloadURL(imageRef);
 
@@ -95,27 +107,7 @@ export async function POST(req: Request) {
         imageUrls: [...(draft.imageUrls || []), imageUrl],
       });
 
-      await reply(event.replyToken, {
-        type: "text",
-        text: "写真を追加しました。",
-      });
-    }
-
-    // 完了
-    if (event.message.type === "text" && event.message.text === "完了") {
-      const final = (await getDoc(draftRef)).data();
-
-      await addDoc(collection(db, "items"), {
-        ...final,
-        createdAt: new Date(),
-      });
-
-      await deleteDoc(draftRef);
-
-      await reply(event.replyToken, {
-        type: "text",
-        text: "保存しました！",
-      });
+      await reply(event.replyToken, "写真を追加しました。");
     }
   }
 
