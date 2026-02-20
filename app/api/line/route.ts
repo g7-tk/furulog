@@ -32,10 +32,7 @@ export async function POST(req: Request) {
 
   for (const event of body.events ?? []) {
 
-    // ⭐ デバッグ：必ず返信
-    if (event.replyToken) {
-      await reply(event.replyToken, "Webhook受信");
-    }
+   
 
     if (event.type !== "message") continue;
 
