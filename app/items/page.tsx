@@ -2,72 +2,81 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-
-interface Item {
-  id: string;
-  brand: string;
-  price: number;
-  image: string;
-  createdAt: any;
-}
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 export default function ItemsPage() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<any[]>([]);
+
+  const fetchItems = async () => {
+    const snapshot = await getDocs(collection(db, "items"));
+    const data = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+    setItems(data);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteDoc(doc(db, "items", id));
+    fetchItems();
+  };
 
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const q = query(collection(db, "items"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(q);
-        const list: Item[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        } as Item));
-        setItems(list);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchItems();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-8">購入一覧 (Firebase版)</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold mb-6">
+        購入一覧（Firebase版）
+      </h1>
 
-      {loading ? (
-        <p>読み込み中...</p>
-      ) : items.length === 0 ? (
-        <p className="text-gray-600">まだ購入したアイテムはありません。</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-2xl shadow-md overflow-hidden"
-            >
-              {item.image && (
-                <img
-                  src={item.image}
-                  alt={item.brand}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h2 className="text-xl font-semibold">{item.brand}</h2>
-                <p className="text-gray-600 mt-2">
-                  ¥{item.price.toLocaleString()}
-                </p>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white p-4 rounded-2xl shadow"
+          >
+            {/* 画像 */}
+            {item.imageUrls?.length > 0 && (
+              <img
+                src={item.imageUrls[0]}
+                alt="item"
+                className="w-full h-48 object-cover rounded-xl mb-3"
+              />
+            )}
+
+            {/* ブランド */}
+            <div className="font-bold text-lg">
+              {item.brand}
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* 価格 */}
+            <div className="text-gray-600">
+              ¥{item.price}
+            </div>
+
+            {/* 場所 */}
+            {item.place && (
+              <div className="text-sm text-gray-500">
+                {item.place}
+              </div>
+            )}
+
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="text-red-500 text-sm mt-2"
+            >
+              削除
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
