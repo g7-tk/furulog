@@ -31,6 +31,12 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   for (const event of body.events ?? []) {
+
+    // ⭐ デバッグ：必ず返信
+    if (event.replyToken) {
+      await reply(event.replyToken, "Webhook受信");
+    }
+
     if (event.type !== "message") continue;
 
     const userId = event.source?.userId;
@@ -104,7 +110,6 @@ export async function POST(req: Request) {
 
       const imageUrl = await getDownloadURL(imageRef);
 
-      // ⭐ 最新draftを再取得してから追加
       const latestSnap = await getDoc(draftRef);
       const latest = latestSnap.data();
 
