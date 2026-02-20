@@ -42,22 +42,22 @@ export async function POST(req: Request) {
     const draftRef = doc(db, "drafts", userId);
 
     // ===== 登録開始 =====
-    if (event.message.type === "text" && event.message.text === "登録") {
-      await setDoc(draftRef, {
-        brand: "",
-        price: 0,
-        place: "",
-        category: "",
-        imageUrls: [],
-      });
+// ===== 登録開始（最優先）=====
+if (event.message.type === "text" && event.message.text === "登録") {
+  await setDoc(draftRef, {
+    brand: "",
+    price: 0,
+    place: "",
+    category: "",
+    imageUrls: [],
+  });
 
-      await reply(event.replyToken, "登録を開始しました。入力してください。");
-      continue;
-    }
+  await reply(event.replyToken, "登録を開始しました。入力してください。");
+  continue;
+}
 
-    const draftSnap = await getDoc(draftRef);
-    if (!draftSnap.exists()) continue;
-
+const draftSnap = await getDoc(draftRef);
+if (!draftSnap.exists()) continue;
     const draft = draftSnap.data();
 
     // ===== テキスト =====
