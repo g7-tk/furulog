@@ -11,48 +11,49 @@ export async function POST(req: Request) {
   const events = body.events || [];
 
   for (const event of events) {
-    if (event.type === "message") {
-      if (event.message.type === "text") {
-        await addDoc(collection(db, "items"), {
-          brand: event.message.text,
-          price: 0,
-          place: "LINE",
-          category: "その他",
-          imageUrl: "",
-          createdAt: new Date(),
-        });
-      }
+    if (event.type !== "message") continue;
 
-      if (event.message.type === "image") {
-        const messageId = event.message.id;
+    // テキスト
+    if (event.message.type === "text") {
+      await addDoc(collection(db, "items"), {
+        brand: event.message.text,
+        price: 0,
+        place: "LINE",
+        category: "その他",
+        imageUrl: "",
+        createdAt: new Date(),
+      });
+    }
 
-        const res = await fetch(
-          `https://api-data.line.me/v2/bot/message/${messageId}/content`,
-          {
-            headers: { Authorization: `Bearer ${TOKEN}` },
-          }
-        );
+    // 画像
+    if (event.message.type === "image") {
+      const messageId = event.message.id;
 
-        const buffer = Buffer.from(await res.arrayBuffer());
+      const res = await fetch(
+        `https://api-data.line.me/v2/bot/message/${messageId}/content`,
+        {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        }
+      );
 
-        // ⭐ JPEGとして保存
-        const imageRef = ref(storage, `line/${Date.now()}.jpg`);
+      const blob = await res.blob();
 
-        await uploadBytes(imageRef, buffer, {
-          contentType: "image/jpeg",
-        });
+      const imageRef = ref(storage, `line/${Date.now()}.jpg`);
 
-        const imageUrl = await getDownloadURL(imageRef);
+      await uploadBytes(imageRef, blob, {
+        contentType: blob.type || "image/jpeg",
+      });
 
-        await addDoc(collection(db, "items"), {
-          brand: "LINE画像",
-          price: 0,
-          place: "LINE",
-          category: "その他",
-          imageUrl,
-          createdAt: new Date(),
-        });
-      }
+      const imageUrl = await getDownloadURL(imageRef);
+
+      await addDoc(collection(db, "items"), {
+        brand: "LINE画像",
+        price: 0,
+        place: "LINE",
+        category: "その他",
+        imageUrl,
+        createdAt: new Date(),
+      });
     }
   }
 
