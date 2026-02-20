@@ -52,7 +52,6 @@ export async function POST(req: Request) {
       continue;
     }
 
-    // draft取得
     const draftSnap = await getDoc(draftRef);
     if (!draftSnap.exists()) continue;
 
@@ -63,8 +62,10 @@ export async function POST(req: Request) {
       const text = event.message.text;
 
       if (text === "完了") {
+        const finalSnap = await getDoc(draftRef);
+
         await addDoc(collection(db, "items"), {
-          ...draft,
+          ...finalSnap.data(),
           createdAt: new Date(),
         });
 
@@ -103,8 +104,12 @@ export async function POST(req: Request) {
 
       const imageUrl = await getDownloadURL(imageRef);
 
+      // ⭐ 最新draftを再取得してから追加
+      const latestSnap = await getDoc(draftRef);
+      const latest = latestSnap.data();
+
       await updateDoc(draftRef, {
-        imageUrls: [...(draft.imageUrls || []), imageUrl],
+        imageUrls: [...(latest?.imageUrls || []), imageUrl],
       });
 
       await reply(event.replyToken, "写真を追加しました。");
