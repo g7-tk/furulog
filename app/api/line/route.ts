@@ -3,7 +3,8 @@ import { db, storage } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const TOKEN = "84pwgSPAyhbDyxgz2cw0jOpZPU+/2UOPifEs8efclAfSDgTQ3bSYFXw+lTYOqfyG+CRqe0vl2jbvCJt44fipxSWG3764wWFojrUDonIMe9VovhyPs583O5LMwzOcFcvqYJtu5uQXS6S7t3TNe1jgdB04t89/1O/w1cDnyilFU=";
+const TOKEN =
+  "84pwgSPAyhbDyxgz2cw0jOpZPU+/2UOPifEs8efclAfSDgTQ3bSYFXw+lTYOqfyG+CRqe0vl2jbvCJt44fipxSWG3764wWFojrUDonIMe9VovhyPs583O5LMwzOcFcvqYJtu5uQXS6S7t3TNe1jgdB04t89/1O/w1cDnyilFU=";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -11,7 +12,6 @@ export async function POST(req: Request) {
 
   for (const event of events) {
     if (event.type === "message") {
-      // テキスト
       if (event.message.type === "text") {
         await addDoc(collection(db, "items"), {
           brand: event.message.text,
@@ -23,25 +23,23 @@ export async function POST(req: Request) {
         });
       }
 
-      // 画像
       if (event.message.type === "image") {
         const messageId = event.message.id;
 
         const res = await fetch(
           `https://api-data.line.me/v2/bot/message/${messageId}/content`,
           {
-            headers: {
-              Authorization: `Bearer ${TOKEN}`,
-            },
+            headers: { Authorization: `Bearer ${TOKEN}` },
           }
         );
 
-        const contentType = res.headers.get("content-type") || "image/jpeg";
-        const buffer = await res.arrayBuffer();
+        const buffer = Buffer.from(await res.arrayBuffer());
 
-        const imageRef = ref(storage, `line/${Date.now()}`);
-        await uploadBytes(imageRef, new Uint8Array(buffer), {
-          contentType,
+        // ⭐ JPEGとして保存
+        const imageRef = ref(storage, `line/${Date.now()}.jpg`);
+
+        await uploadBytes(imageRef, buffer, {
+          contentType: "image/jpeg",
         });
 
         const imageUrl = await getDownloadURL(imageRef);
