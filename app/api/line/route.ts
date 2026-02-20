@@ -8,9 +8,8 @@ const TOKEN =
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const events = body.events || [];
 
-  for (const event of events) {
+  for (const event of body.events ?? []) {
     if (event.type !== "message") continue;
 
     // テキスト
@@ -31,18 +30,20 @@ export async function POST(req: Request) {
 
       const res = await fetch(
         `https://api-data.line.me/v2/bot/message/${messageId}/content`,
-        {
-          headers: { Authorization: `Bearer ${TOKEN}` },
-        }
+        { headers: { Authorization: `Bearer ${TOKEN}` } }
       );
 
-      const blob = await res.blob();
+      const arrayBuffer = await res.arrayBuffer();
 
-      const imageRef = ref(storage, `line/${Date.now()}.jpg`);
+      const imageRef = ref(storage, `line/${Date.now()}`);
 
-      await uploadBytes(imageRef, blob, {
-        contentType: blob.type || "image/jpeg",
-      });
+      await uploadBytes(
+        imageRef,
+        new Uint8Array(arrayBuffer),
+        {
+          contentType: res.headers.get("content-type") || "image/jpeg",
+        }
+      );
 
       const imageUrl = await getDownloadURL(imageRef);
 
