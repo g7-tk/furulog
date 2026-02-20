@@ -91,7 +91,7 @@ export async function POST(req: Request) {
 
       const arrayBuffer = await res.arrayBuffer();
 
-      const imageRef = ref(storage, `line/${Date.now()}`);
+      const imageRef = ref(storage, `line/${Date.now()}.jpg`);
 
       await uploadBytes(
         imageRef,
