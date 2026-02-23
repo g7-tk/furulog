@@ -24,7 +24,21 @@ export default function AnalysisPage() {
     categoryMap[i.category]=(categoryMap[i.category]||0)+1;
   });
 
-  const topCategories=Object.entries(categoryMap).sort((a:any,b:any)=>b[1]-a[1]);
+  const categories=Object.entries(categoryMap);
+
+  const sum=categories.reduce((s:any,c:any)=>s+c[1],0);
+
+  // simple pie calc
+  let cumulative=0;
+  const colors=["#111","#666","#999","#ccc","#ddd"];
+
+  const slices=categories.map((c:any,index:number)=>{
+    const value=c[1];
+    const start=cumulative/sum*100;
+    cumulative+=value;
+    const end=cumulative/sum*100;
+    return {label:c[0],start,end,color:colors[index%colors.length],value};
+  });
 
   return(
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 p-4 pb-32">
@@ -32,7 +46,7 @@ export default function AnalysisPage() {
       <h1 className="text-2xl font-semibold mb-4">Analysis</h1>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-white rounded-2xl p-4 shadow">
           <div className="text-xs text-gray-400">Total Items</div>
           <div className="text-xl font-semibold">{items.length}</div>
@@ -44,15 +58,31 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* Category ranking */}
-      <div className="bg-white rounded-2xl p-4 shadow mb-3">
-        <div className="text-xs text-gray-400 mb-2">Category Ranking</div>
+      {/* Pie chart */}
+      <div className="bg-white rounded-2xl p-6 shadow mb-4">
+        <div className="text-xs text-gray-400 mb-3">Category Pie</div>
 
-        <div className="space-y-2">
-          {topCategories.map((c:any)=>(
-            <div key={c[0]} className="flex justify-between text-sm">
-              <span>{c[0]}</span>
-              <span className="text-gray-400">{c[1]}</span>
+        <div className="flex justify-center">
+          <div className="relative w-40 h-40">
+            {slices.map((s:any,i:number)=>(
+              <div
+                key={i}
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:`conic-gradient(${s.color} ${s.start}% ${s.end}%, transparent ${s.end}% 100%)`,
+                  mask:"radial-gradient(circle 55px at center, transparent 98%, black 100%)",
+                  WebkitMask:"radial-gradient(circle 55px at center, transparent 98%, black 100%)"
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-1">
+          {slices.map((s:any,i:number)=>(
+            <div key={i} className="flex justify-between text-sm">
+              <span>{s.label}</span>
+              <span className="text-gray-400">{s.value}</span>
             </div>
           ))}
         </div>
