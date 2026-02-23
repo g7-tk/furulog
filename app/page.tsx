@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export default function Home() {
@@ -9,56 +10,52 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const snapshot = await getDocs(collection(db, "items"));
-
-      const data: any[] = [];
-      snapshot.forEach((d) => {
-        const item = d.data();
-        data.push({
-          id: d.id,
-          brand: item.brand || "",
-          price: item.price || 0,
-          imageUrl: item.imageUrl || "",
-        });
-      });
-
-      setItems(data);
+      const snap = await getDocs(collection(db, "items"));
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setItems(data.reverse());
     };
-
     fetchData();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    await deleteDoc(doc(db, "items", id));
-    location.reload();
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">購入一覧 (Firebase版)</h1>
+    <div className="min-h-screen bg-gray-100">
 
-      <div className="grid grid-cols-2 gap-4">
-        {items.map((item) => (
-          <div key={item.id} className="bg-white p-4 rounded-2xl shadow">
-            {item.imageUrl !== "" && (
+      {/* ヘッダー */}
+      <div className="sticky top-0 bg-white border-b p-4 flex justify-between">
+        <h1 className="text-xl font-bold">Furulog</h1>
+        <Link href="/add" className="bg-black text-white px-4 py-2 rounded-xl">
+          ＋登録
+        </Link>
+      </div>
+
+      {/* グリッド */}
+      <div className="p-4 grid grid-cols-2 gap-4">
+        {items.map((item: any) => (
+          <div key={item.id} className="bg-white rounded-2xl shadow overflow-hidden">
+
+            {item.imageUrls?.[0] && (
               <img
-                src={item.imageUrl}
-                className="w-full h-40 object-cover rounded-xl mb-3"
+                src={item.imageUrls[0]}
+                className="h-40 w-full object-cover"
               />
             )}
 
-            <p className="font-bold">{item.brand}</p>
-            <p>¥{item.price}</p>
+            <div className="p-3">
+              <div className="font-semibold">{item.brand}</div>
+              <div className="text-sm text-gray-500">¥{item.price}</div>
+            </div>
 
-            <button
-              onClick={() => handleDelete(item.id)}
-              className="mt-3 text-sm text-red-500"
-            >
-              削除
-            </button>
           </div>
         ))}
       </div>
+
+      {/* 下ナビ */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3">
+        <Link href="/">🏠</Link>
+        <Link href="/analysis">📊</Link>
+        <Link href="/add">＋</Link>
+      </div>
+
     </div>
   );
 }
