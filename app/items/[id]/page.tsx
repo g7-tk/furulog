@@ -9,9 +9,9 @@ export default function ItemDetail() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
-  if (!id) return <div className="p-6">Loading...</div>;
-
   const [item,setItem]=useState<any>(null);
+
+  if (!id) return <div className="p-6">Loading...</div>;
 
   useEffect(()=>{
     const fetchItem=async()=>{
