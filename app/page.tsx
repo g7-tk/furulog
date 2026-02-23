@@ -30,8 +30,17 @@ export default function Home() {
 
       {/* グリッド */}
       <div className="p-4 grid grid-cols-2 gap-4">
+        {items.length === 0 && (
+          <div className="col-span-2 text-center text-gray-400 py-20">
+            まだ登録がありません
+          </div>
+        )}
+
         {items.map((item: any) => (
-          <div key={item.id} className="bg-white rounded-2xl shadow overflow-hidden">
+          <div
+            key={item.id}
+            className="bg-white rounded-2xl shadow overflow-hidden transition transform hover:scale-[1.02]"
+          >
 
             {item.imageUrls?.[0] && (
               <img
@@ -40,9 +49,18 @@ export default function Home() {
               />
             )}
 
-            <div className="p-3">
+            <div className="p-3 space-y-1">
               <div className="font-semibold">{item.brand}</div>
+
               <div className="text-sm text-gray-500">¥{item.price}</div>
+
+              {item.category && (
+                <div className="text-xs text-gray-400">{item.category}</div>
+              )}
+
+              {item.place && (
+                <div className="text-xs text-gray-400">{item.place}</div>
+              )}
             </div>
 
           </div>
