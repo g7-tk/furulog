@@ -18,14 +18,33 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-rose-50 pb-28">
 
       {/* ヘッダー */}
-      <div className="sticky top-0 bg-white border-b p-4 flex justify-between">
-        <h1 className="text-xl font-bold">Furulog</h1>
-        <Link href="/add" className="bg-black text-white px-4 py-2 rounded-xl">
-          ＋登録
+      <div className="sticky top-0 backdrop-blur bg-white/70 border-b p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Furulog</h1>
+
+        <Link
+          href="/add"
+          className="bg-black text-white px-4 py-2 rounded-full shadow active:scale-95 transition"
+        >
+          ＋
         </Link>
+      </div>
+
+      {/* ウィジェット分析 */}
+      <div className="px-4 pt-4 grid grid-cols-2 gap-3">
+        <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow">
+          <div className="text-xs text-gray-400">総アイテム</div>
+          <div className="text-xl font-semibold">{items.length}</div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow">
+          <div className="text-xs text-gray-400">総金額</div>
+          <div className="text-xl font-semibold">
+            ¥{items.reduce((sum, i) => sum + (i.price || 0), 0)}
+          </div>
+        </div>
       </div>
 
       {/* グリッド */}
@@ -39,41 +58,43 @@ export default function Home() {
         {items.map((item: any) => (
           <div
             key={item.id}
-            className="bg-white rounded-2xl shadow overflow-hidden transition transform hover:scale-[1.02]"
+            className="bg-white/90 backdrop-blur rounded-3xl shadow-xl overflow-hidden transition active:scale-[0.97]"
           >
-
             {item.imageUrls?.[0] && (
               <img
                 src={item.imageUrls[0]}
-                className="h-40 w-full object-cover"
+                className="h-44 w-full object-cover"
               />
             )}
 
-            <div className="p-3 space-y-1">
-              <div className="font-semibold">{item.brand}</div>
+            <div className="p-4 space-y-1">
+              <div className="font-semibold text-[15px]">{item.brand}</div>
 
               <div className="text-sm text-gray-500">¥{item.price}</div>
 
-              {item.category && (
-                <div className="text-xs text-gray-400">{item.category}</div>
-              )}
-
-              {item.place && (
-                <div className="text-xs text-gray-400">{item.place}</div>
-              )}
+              <div className="flex gap-2 flex-wrap pt-1">
+                {item.category && (
+                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                    {item.category}
+                  </span>
+                )}
+                {item.place && (
+                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                    {item.place}
+                  </span>
+                )}
+              </div>
             </div>
-
           </div>
         ))}
       </div>
 
       {/* 下ナビ */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3">
-        <Link href="/">🏠</Link>
-        <Link href="/analysis">📊</Link>
-        <Link href="/add">＋</Link>
+      <div className="fixed bottom-4 left-4 right-4 bg-white/80 backdrop-blur border shadow-xl rounded-2xl flex justify-around p-3">
+        <Link href="/" className="text-lg">🏠</Link>
+        <Link href="/analysis" className="text-lg">📊</Link>
+        <Link href="/add" className="text-lg">＋</Link>
       </div>
-
     </div>
   );
 }
