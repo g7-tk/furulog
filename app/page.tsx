@@ -41,13 +41,11 @@ export default function AnalysisPage() {
   return(
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 p-4 pb-32 text-gray-900">
 
-      {/* Header */}
       <div className="sticky top-0 backdrop-blur bg-white/70 border-b p-4 mb-4">
         <h1 className="text-2xl font-semibold tracking-tight">Analysis</h1>
         <p className="text-sm text-gray-400">あなたの購入傾向</p>
       </div>
 
-      {/* KPI */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="text-xs text-gray-400 mb-1">Items</div>
@@ -60,20 +58,18 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* Chart card */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-4">
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm font-medium">Category Balance</div>
           <div className="text-xs text-gray-400">{sum} items</div>
         </div>
 
-        {/* donut */}
         <div className="flex justify-center mb-5">
           <div className="relative w-44 h-44">
             {slices.map((s:any,i:number)=>(
               <div
                 key={i}
-                className="absolute inset-0 rounded-full transition"
+                className="absolute inset-0 rounded-full"
                 style={{
                   background:`conic-gradient(${s.color} ${s.start}% ${s.end}%, transparent ${s.end}% 100%)`,
                   mask:"radial-gradient(circle 64px at center, transparent 99%, black 100%)",
@@ -84,7 +80,6 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* legend with bars */}
         <div className="space-y-3">
           {slices.map((s:any,i:number)=>(
             <div key={i}>
@@ -110,7 +105,6 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* Recent */}
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
         <div className="text-sm font-medium mb-3">Recent Purchases</div>
 
