@@ -33,18 +33,38 @@ export default function Home() {
       </div>
 
       {/* ウィジェット分析 */}
-      <div className="px-4 pt-4 grid grid-cols-2 gap-3">
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow">
-          <div className="text-xs text-gray-400">総アイテム</div>
-          <div className="text-xl font-semibold">{items.length}</div>
-        </div>
+      <div className="px-4 pt-4 space-y-3">
 
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow">
-          <div className="text-xs text-gray-400">総金額</div>
-          <div className="text-xl font-semibold">
-            ¥{items.reduce((sum, i) => sum + (i.price || 0), 0)}
+        {/* 上2つ */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white/90 backdrop-blur rounded-2xl p-4 shadow">
+            <div className="text-xs text-gray-400">総アイテム</div>
+            <div className="text-xl font-semibold">{items.length}</div>
+          </div>
+
+          <div className="bg-white/90 backdrop-blur rounded-2xl p-4 shadow">
+            <div className="text-xs text-gray-400">総金額</div>
+            <div className="text-xl font-semibold">
+              ¥{items.reduce((sum, i) => sum + (i.price || 0), 0)}
+            </div>
           </div>
         </div>
+
+        {/* 最近の購入 */}
+        <div className="bg-white/90 backdrop-blur rounded-2xl p-4 shadow">
+          <div className="text-xs text-gray-400 mb-2">最近の購入</div>
+
+          {items.slice(0, 3).map((i:any) => (
+            <div key={i.id} className="flex items-center gap-3 py-1">
+              {i.imageUrls?.[0] && (
+                <img src={i.imageUrls[0]} className="w-10 h-10 object-cover rounded-lg"/>
+              )}
+              <div className="text-sm flex-1">{i.brand}</div>
+              <div className="text-xs text-gray-400">¥{i.price}</div>
+            </div>
+          ))}
+        </div>
+
       </div>
 
       {/* グリッド */}
