@@ -28,40 +28,45 @@ async function reply(replyToken: string, text: string) {
 }
 
 export async function POST(req: Request) {
+  // ⭐ 追加したログ
+  console.log("LINE webhook hit");
+
   const body = await req.json();
 
   for (const event of body.events ?? []) {
 
-   
+    // ===== 登録開始（最優先）=====
+    if (event.type === "message" && event.message.type === "text" && event.message.text === "登録") {
+      const userId = event.source?.userId;
+      if (!userId) continue;
 
-    if (event.type !== "message") continue;
+      const draftRef = doc(db, "drafts", userId);
+
+      await setDoc(draftRef, {
+        brand: "",
+        price: 0,
+        place: "",
+        category: "",
+        imageUrls: [],
+      });
+
+      await reply(event.replyToken, "登録を開始しました。入力してください。");
+      continue;
+    }
 
     const userId = event.source?.userId;
     if (!userId) continue;
 
     const draftRef = doc(db, "drafts", userId);
 
-    // ===== 登録開始 =====
-// ===== 登録開始（最優先）=====
-if (event.message.type === "text" && event.message.text === "登録") {
-  await setDoc(draftRef, {
-    brand: "",
-    price: 0,
-    place: "",
-    category: "",
-    imageUrls: [],
-  });
+    if (event.type !== "message") continue;
 
-  await reply(event.replyToken, "登録を開始しました。入力してください。");
-  continue;
-}
-
-const draftSnap = await getDoc(draftRef);
-if (!draftSnap.exists()) continue;
+    const draftSnap = await getDoc(draftRef);
+    if (!draftSnap.exists()) continue;
     const draft = draftSnap.data();
 
     // ===== テキスト =====
-    if (event.message.type === "text") {
+    if (event.message.type === "text" && event.message.text !== "登録") {
       const text = event.message.text;
 
       if (text === "完了") {
