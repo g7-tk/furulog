@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useParams } from "next/navigation";
+ç
 
 export default function ItemDetail() {
-  const params = useParams<{ id: string }>();
+  const Ω√√√√√z= useParams<{ id: string }>();
   const id = params?.id;
 
   const [item, setItem] = useState<any>(null);

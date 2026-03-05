@@ -43,13 +43,16 @@ export default function ItemsPage() {
             className="bg-white p-4 rounded-2xl shadow"
           >
             {/* 画像 */}
-            {item.imageUrls?.length > 0 && (
-              <img
-                src={item.imageUrls[0]}
-                alt="item"
-                className="w-full h-48 object-cover rounded-xl mb-3"
-              />
-            )}
+            {(() => {
+              const image = item.imageUrl || item.imageUrls?.[0];
+              return image ? (
+                <img
+                  src={String(image)}
+                  alt="item"
+                  className="w-full h-48 object-cover rounded-xl mb-3"
+                />
+              ) : null;
+            })()}
 
             {/* ブランド */}
             <div className="font-bold text-lg">
